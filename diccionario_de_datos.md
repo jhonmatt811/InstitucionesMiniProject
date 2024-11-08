@@ -184,5 +184,3 @@
 
 ---
 
-**Nota**: Completar los campos `Descripción` y `Dominio` para cada columna según sea necesario para la documentación.
-
