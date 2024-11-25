@@ -1,12 +1,6 @@
 <?php
 require_once './src/controllers/EntidadesEducativas.php';
-require_once './src/controllers/Departamentos.php';
 
-$deptController = new Departamentos();
-$departamentosName = $deptController->getAll();
-
-$tipoEstadistica = $_POST['tipo_estadistica'] ?? null;
-$departamentoSeleccionado = $_POST['departamento'] ?? null;
 // Crear una instancia del controlador
 $entidadesEducativas = new EntidadesEducativas(new Database());
 $instituciones = $entidadesEducativas->getStadistcByDepStatus();
@@ -16,6 +10,8 @@ $institucionesPorActoAdmon = $entidadesEducativas->stadisticByActoAdmon();
 $institucionesPorNormaCreacion = $entidadesEducativas->stadisticByNormaCreacion();
 
 // Inicializar valores
+$tipoEstadistica = $_POST['tipo_estadistica'] ?? null;
+$departamentoSeleccionado = $_POST['departamento'] ?? null;
 
 // Formatear los datos para JavaScript
 $departamentos = [];
@@ -84,7 +80,6 @@ foreach ($institucionesPorNormaCreacion as $norma) {
             <div>
                 <label for="tipo_estadistica" class="block text-black font-medium mb-1">Tipo de Estadística:</label>
                 <select id="tipo_estadistica" name="tipo_estadistica" class="w-full p-2 border border-gray-300 rounded-md">
-                    <option value="" disabled selected>-- Selecciona una busqueda --</option>
                     <option value="1" <?= $tipoEstadistica == "1" ? 'selected' : '' ?>>Instituciones Activas e Inactivas por Departamento</option>
                     <option value="2" <?= $tipoEstadistica == "2" ? 'selected' : '' ?>>Instituciones por Tipo de Carácter Académico</option>
                     <option value="3" <?= $tipoEstadistica == "3" ? 'selected' : '' ?>>Instituciones por Sector en Cada Departamento</option>
@@ -92,20 +87,6 @@ foreach ($institucionesPorNormaCreacion as $norma) {
                     <option value="5" <?= $tipoEstadistica == "5" ? 'selected' : '' ?>>Instituciones por Norma de Creación</option>
                 </select>
             </div>
-
-            <div>
-                <label for="dept_input" class="block text-black font-medium mb-1">Departamento:</label>
-                <select id="dept_input" name="departamento" class="w-full p-2 border border-gray-300 rounded-md">
-                    <option value="" disabled selected>-- Selecciona un departamento si es necesario--</option>
-                    <option value="Todos">Todos</option>
-                    <?php
-                        foreach ($dpto as $departamentosName):
-                    ?>
-                        <option value="<?= $departamentosName['nomb_depto'] ?>" <?= $departamentoSeleccionado == $departamentosName['nomb_depto'] ? 'selected' : '' ?>><?= $departamentosName['nomb_depto'] ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
             <div class="flex justify-between">
                 <button type="reset" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Cancelar</button>
                 <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Confirmar</button>
@@ -113,31 +94,42 @@ foreach ($institucionesPorNormaCreacion as $norma) {
         </form>
 
         <?php if ($tipoEstadistica == "1"): ?>
-        <h2 class="text-2xl font-bold px-4 mb-2">Instituciones Activas e Inactivas por Departamento</h2>
-        <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-            <canvas id="institucionesPorDepartamento" width="400" height="auto"></canvas>
+    <h2 class="text-2xl font-bold px-4 mb-2">Instituciones Activas e Inactivas por Departamento</h2>
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div>
+            <canvas id="institucionesPorDepartamento" width="800" height="300"></canvas>
         </div>
-        <?php elseif ($tipoEstadistica == "2"): ?>
-        <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Tipo de Carácter Académico</h2>
-        <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-            <canvas id="institucionesPorCaracterAcademico" width="400" height="auto"></canvas>
+    </div>
+<?php elseif ($tipoEstadistica == "2"): ?>
+    <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Tipo de Carácter Académico</h2>
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div class="max-w-md mx-auto">
+            <canvas id="institucionesPorCaracterAcademico" class="w-full h-auto"></canvas>
         </div>
-        <?php elseif ($tipoEstadistica == "3"): ?>
-        <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Sector en Cada Departamento</h2>
-        <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-            <canvas id="institucionesPorSector" width="400" height="auto"></canvas>
+    </div>
+<?php elseif ($tipoEstadistica == "3"): ?>
+    <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Sector en Cada Departamento</h2>
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div class="">
+            <canvas id="institucionesPorSector" width="800" height="300"></canvas>
         </div>
-        <?php elseif ($tipoEstadistica == "4"): ?>
-        <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Acto Administrativo</h2>
-        <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-            <canvas id="institucionesPorActoAdmon" width="400" height="auto"></canvas>
+    </div>
+<?php elseif ($tipoEstadistica == "4"): ?>
+    <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Acto Administrativo</h2>
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div class="max-w-md mx-auto">
+            <canvas id="institucionesPorActoAdmon" class="w-full h-auto"></canvas>
         </div>
-        <?php elseif ($tipoEstadistica == "5"): ?>
-        <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Norma de Creación</h2>
-        <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-            <canvas id="institucionesPorNormaCreacion" width="400" height="auto"></canvas>
+    </div>
+<?php elseif ($tipoEstadistica == "5"): ?>
+    <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Norma de Creación</h2>
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div class="max-w-md mx-auto">
+            <canvas id="institucionesPorNormaCreacion" class="w-full h-auto"></canvas>
         </div>
-        <?php endif; ?>
+    </div>
+<?php endif; ?>
+
     </section>
 
 
@@ -157,47 +149,26 @@ foreach ($institucionesPorNormaCreacion as $norma) {
         const institucionesPublicas = <?php echo json_encode($institucionesPublicas); ?>;
         const normasCreacion = <?php echo json_encode($normasCreacion); ?>;
         const totalInstitucionesPorNorma = <?php echo json_encode($totalInstitucionesPorNorma); ?>;
-        const tipoEstadistica = "<?php echo $tipoEstadistica; ?>";
-        const departamentoSelected = "<?php echo $departamentoSeleccionado; ?>";
+        const tipoEstadistica = <?php echo json_encode($tipoEstadistica); ?>;
         
-        let labelsFiltered = [];
-        let dataActivasFiltered = [];
-        let dataInactivasFiltered = [];
-
-        // Filtrar datos según el departamento seleccionado
-        if (departamentoSelected === "Todos" || !departamentoSelected) {
-            labelsFiltered = [...departamentos];
-            dataActivasFiltered = [...institucionesActivas];
-            dataInactivasFiltered = [...institucionesInactivas];
-        } else {
-            const index = departamentos.indexOf(departamentoSelected);
-            if (index !== -1) {
-                labelsFiltered = [departamentos[index]];
-                dataActivasFiltered = [institucionesActivas[index]];
-                dataInactivasFiltered = [institucionesInactivas[index]];
-            }
-        }
-
-        console.log('here',labelsFiltered);
-        // Configuración del gráfico de instituciones por departamento
         if(tipoEstadistica == '1'){            
-        
+        // Configuración del gráfico de instituciones por departamento
             const ctxDepartamentos = document.getElementById('institucionesPorDepartamento').getContext('2d');
             const chartDepartamentos = new Chart(ctxDepartamentos, {
                 type: 'bar',
                 data: {
-                    labels: labelsFiltered,
+                    labels: departamentos,
                     datasets: [
                         {
                             label: 'Instituciones Activas',
-                            data: dataActivasFiltered,
+                            data: institucionesActivas,
                             backgroundColor: 'rgba(75, 192, 192, 0.2)',
                             borderColor: 'rgba(75, 192, 192, 1)',
                             borderWidth: 1
                         },
                         {
                             label: 'Instituciones Inactivas',
-                            data: dataInactivasFiltered,
+                            data: institucionesInactivas,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             borderColor: 'rgba(255, 99, 132, 1)',
                             borderWidth: 1
@@ -271,8 +242,7 @@ foreach ($institucionesPorNormaCreacion as $norma) {
                 }
             });
         }
-        else if(tipoEstadistica == '3'){
-
+        else if(tipoEstadistica == '3'){            
             // Configuración del gráfico de instituciones por sector en cada departamento
             const ctxSector = document.getElementById('institucionesPorSector').getContext('2d');
             const chartSector = new Chart(ctxSector, {
@@ -307,7 +277,7 @@ foreach ($institucionesPorNormaCreacion as $norma) {
             });
         }
         else if(tipoEstadistica == '4'){
-        // Configuración del gráfico de instituciones por acto administrativo
+            // Configuración del gráfico de instituciones por acto administrativo
             const ctxActoAdmon = document.getElementById('institucionesPorActoAdmon').getContext('2d');
             const chartActoAdmon = new Chart(ctxActoAdmon, {
                 type: 'pie',
@@ -355,8 +325,7 @@ foreach ($institucionesPorNormaCreacion as $norma) {
                     }
                 }
             });
-        }
-        else if(tipoEstadistica == '5'){
+        }else if(tipoEstadistica == '5'){
             // Configuración del gráfico de instituciones por norma de creación
             const ctxNormaCreacion = document.getElementById('institucionesPorNormaCreacion').getContext('2d');
             const chartNormaCreacion = new Chart(ctxNormaCreacion, {
