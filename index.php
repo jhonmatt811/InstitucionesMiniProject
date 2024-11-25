@@ -1,17 +1,46 @@
 <?php
 require_once './src/controllers/EntidadesEducativas.php';
+require_once './src/controllers/Departamentos.php';
+
+$tipoEstadistica = $_POST['tipo_estadistica'] ?? null;
+$departamentoSeleccionado = $_POST['departamento'] ?? null;
+$sectorSeleccionado = $_POST['sector'] ?? null;
+$actoSeleccionado = $_POST['acto'] ?? null;
 
 // Crear una instancia del controlador
 $entidadesEducativas = new EntidadesEducativas(new Database());
-$instituciones = $entidadesEducativas->getStadistcByDepStatus();
+$departamentosCtrl = new Departamentos();
+
+$departamentosNoRepeat = $departamentosCtrl->getAll();
+
+$instituciones = [];
 $institucionesPorCaracterAcademico = $entidadesEducativas->stadisticsByAcademicCharacter();
-$institucionesPorSectorDepartamento = $entidadesEducativas->stadisticBySectorDept();
+$institucionesPorSectorDepartamento = [];
 $institucionesPorActoAdmon = $entidadesEducativas->stadisticByActoAdmon();
 $institucionesPorNormaCreacion = $entidadesEducativas->stadisticByNormaCreacion();
+$sectores = [];
 
+$tiposActo = $entidadesEducativas->actoAdmin();
+
+#por reporte
+
+$institucionesReporte = [];
+$institucionesActo = [];
+$institucionesCaracter = [];
+$institucionesSector = [];
+
+if($departamentoSeleccionado != null){
+    $instituciones = $entidadesEducativas->getStadistcByDepStatusById($departamentoSeleccionado);
+    $institucionesPorSectorDepartamento = $entidadesEducativas->stadisticBySectorDeptById($departamentoSeleccionado);
+    $institucionesReporte = $entidadesEducativas->getInstByDeptStatus($status,$departamentoSeleccionado);
+    $institucionesSector = $entidadesEducativas->instBySectorDept($sectorSeleccionado,$departamentoSeleccionado);
+}else{
+    $instituciones = $entidadesEducativas->getStadistcByDepStatus();
+    $institucionesPorSectorDepartamento = $entidadesEducativas->stadisticBySectorDept();
+    $institucionesCaracter = $entidadesEducativas->getByAcademicCHaracter($caracterSeleccionado);
+    $institucionesSector = $entidadesEducativas->instBySector($sectorSeleccionado);
+}
 // Inicializar valores
-$tipoEstadistica = $_POST['tipo_estadistica'] ?? null;
-$departamentoSeleccionado = $_POST['departamento'] ?? null;
 
 // Formatear los datos para JavaScript
 $departamentos = [];
@@ -21,7 +50,6 @@ $tiposCaracterAcademico = [];
 $totalInstitucionesPorCaracter = [];
 $actosAdministrativos = [];
 $totalInstitucionesPorActo = [];
-$sectores = [];
 $institucionesPrivadas = [];
 $institucionesPublicas = [];
 $normasCreacion = [];
@@ -75,23 +103,59 @@ foreach ($institucionesPorNormaCreacion as $norma) {
         <h1 class="text-3xl font-bold px-4 mb-4">Reportes y Estadísticas de Instituciones</h1>
 
         <form method="POST" action="" class="flex flex-col gap-4 px-4 py-4 bg-white shadow-md rounded-md">
-            <h2 class="text-xl font-semibold mb-2">Selecciona la Estadística a Consultar</h2>
+        <h2 class="text-xl font-semibold mb-2">Selecciona la Estadística a Consultar</h2>
 
-            <div>
-                <label for="tipo_estadistica" class="block text-black font-medium mb-1">Tipo de Estadística:</label>
-                <select id="tipo_estadistica" name="tipo_estadistica" class="w-full p-2 border border-gray-300 rounded-md">
-                    <option value="1" <?= $tipoEstadistica == "1" ? 'selected' : '' ?>>Instituciones Activas e Inactivas por Departamento</option>
-                    <option value="2" <?= $tipoEstadistica == "2" ? 'selected' : '' ?>>Instituciones por Tipo de Carácter Académico</option>
-                    <option value="3" <?= $tipoEstadistica == "3" ? 'selected' : '' ?>>Instituciones por Sector en Cada Departamento</option>
-                    <option value="4" <?= $tipoEstadistica == "4" ? 'selected' : '' ?>>Instituciones por Acto Administrativo</option>
-                    <option value="5" <?= $tipoEstadistica == "5" ? 'selected' : '' ?>>Instituciones por Norma de Creación</option>
-                </select>
-            </div>
-            <div class="flex justify-between">
-                <button type="reset" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Cancelar</button>
-                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Confirmar</button>
-            </div>
-        </form>
+        <div>
+            <!-- Selección de Tipo de Estadística -->
+            <label for="tipo_estadistica" class="block text-black font-medium mb-1">Tipo de Estadística:</label>
+            <select id="tipo_estadistica" name="tipo_estadistica" class="w-full p-2 border border-gray-300 rounded-md mb-2">
+                <option value="1" <?= $tipoEstadistica == "1" ? 'selected' : '' ?>>Instituciones Activas e Inactivas por Departamento</option>
+                <option value="2" <?= $tipoEstadistica == "2" ? 'selected' : '' ?>>Instituciones por Tipo de Carácter Académico</option>
+                <option value="3" <?= $tipoEstadistica == "3" ? 'selected' : '' ?>>Instituciones por Sector en Cada Departamento</option>
+                <option value="4" <?= $tipoEstadistica == "4" ? 'selected' : '' ?>>Instituciones por Acto Administrativo</option>
+                <option value="5" <?= $tipoEstadistica == "5" ? 'selected' : '' ?>>Instituciones por Norma de Creación</option>
+            </select>
+
+            <!-- Selección de Departamento -->
+            <label for="departamento" class="block text-black font-medium mb-1">Escoge el departamento si es necesario</label>
+            <select id="departamento" name="departamento" class="w-full p-2 border border-gray-300 rounded-md">
+                <option value="">Todos</option>
+                <?php foreach ($departamentosNoRepeat as $depto): ?>
+                    <option 
+                        value="<?php echo htmlspecialchars($depto["cod_depto"]); ?>" 
+                        <?= $departamentoSeleccionado == $depto["cod_depto"] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($depto["nomb_depto"]); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <!-- Selección de Sector -->
+            <label for="sector" class="block text-black font-medium mb-1">Tipo Sector</label>
+            <select id="sector" name="sector" class="w-full p-2 border border-gray-300 rounded-md">
+                <option value="sect_01" <?= $sectorSeleccionado == 'sect_01' ? 'selected' : ''; ?>>Pública</option>
+                <option value="sect_02" <?= $sectorSeleccionado == 'sect_02' ? 'selected' : ''; ?>>Privada</option>
+            </select>
+
+            <!-- Selección de Acto Administrativo -->
+            <label for="acto" class="block text-black font-medium mb-1">Tipo Acto Administrativo</label>
+            <select id="acto" name="acto" class="w-full p-2 border border-gray-300 rounded-md">
+                <?php foreach ($tiposActo as $item): ?>
+                    <option 
+                        value="<?php echo htmlspecialchars($item['cod_admon']); ?>" 
+                        <?= $actoSeleccionado == $item['cod_admon'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($item['nomb_admon']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-between">
+            <button type="reset" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Cancelar</button>
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Confirmar</button>
+        </div>
+    </form>
+
 
         <?php if ($tipoEstadistica == "1"): ?>
     <h2 class="text-2xl font-bold px-4 mb-2">Instituciones Activas e Inactivas por Departamento</h2>
@@ -99,6 +163,27 @@ foreach ($institucionesPorNormaCreacion as $norma) {
         <div>
             <canvas id="institucionesPorDepartamento" width="800" height="300"></canvas>
         </div>
+        <table class="table-auto w-full border-collapse border border-gray-200 bg-white shadow-md">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border border-gray-300 px-4 py-2 text-left">Nombre Institución</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Municipio</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Departamento</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Dirección</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($institucionesReporte as $fila): ?>
+                    <tr class="hover:bg-gray-100">
+                        <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['nomb_inst']) ?></td>
+                        <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['nomb_munic']) ?></td>
+                        <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['nomb_depto']) ?></td>
+                        <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['direccion']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        
     </div>
 <?php elseif ($tipoEstadistica == "2"): ?>
     <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Tipo de Carácter Académico</h2>

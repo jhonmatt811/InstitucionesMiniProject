@@ -16,15 +16,10 @@
             <li class="p-4 hover:bg-gray-400 cursor-pointer">
                 <div class="flex items-center gap-2">
                     <span class="material-icons">person</span>
-                    <a href="javascript void(0)">Directores</a>
+                    <a href="/src/views/Instituciones/DirectivosView.php">Directores</a>
                 </div>
             </li>
-            <li class="p-4 hover:bg-gray-400 cursor-pointer">
-                <div class="flex items-center gap-2">
-                    <span class="material-icons">map</span>
-                    <a href="javascript void(0)">Cobertura</a>
-                </div>
-            </li>
+            
         </ul>
     </nav>
 </aside>

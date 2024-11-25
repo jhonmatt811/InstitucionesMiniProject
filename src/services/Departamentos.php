@@ -7,7 +7,7 @@ class DepartamentosService {
         $this->db = $db->getConnection();
     }
     public function getAll(){
-        $query = 'SELECT nomb_depto FROM departamentos;';
+        $query = 'SELECT cod_depto,nomb_depto FROM departamentos;';
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll();
