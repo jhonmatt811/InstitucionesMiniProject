@@ -63,16 +63,41 @@ class EntidadesEducativas {
         exit;
     }
 
+    public function getStadistcByDepStatus(){
+        $entidadesEducativas = $this->service->getStadistcByDepStatus();
+        return $entidadesEducativas;
+    }
+
     public function getInstByStatus($codEstado){
         return $this->service->getInstByStatus($codEstado);
     }
     public function getInstByDeptStatus($codEstado,$codDept){
         return $this->service->getInstByDeptStatus($codEstado,$codDept);
     }
+
+    public function getStadistcByDepStatusById($id){
+        $entidadesEducativas = $this->service->getStadistcByDepStatusById($id);
+        return $entidadesEducativas;   
+    }
+
+    public function stadisticsByAcademicCharacter(){
+        $entidadesEducativas = $this->service->stadisticsByAcademicCharacter();
+        return $entidadesEducativas;
+    }
     public function getByAcademicCHaracter($caracterAcademico){
         $entidadesEducativas = $this->service->getByAcademicCHaracter($caracterAcademico);
         return $entidadesEducativas;
     }
+    public function stadisticBySectorDept(){
+        $entidadesEducativas = $this->service->stadisticBySectorDept();
+        return $entidadesEducativas;
+    }
+    public function stadisticBySectorDeptById($id){
+        $entidadesEducativas = $this->service->stadisticBySectorDeptById($id);
+        
+        return $entidadesEducativas;
+    }
+
     public function instBySector($codSector){
         $entidadesEducativas = $this->service->instBySector($codSector);
         return $entidadesEducativas;
@@ -80,6 +105,15 @@ class EntidadesEducativas {
 
     public function instBySectorDept($codSector,$codDept){
         $entidadesEducativas = $this->service->instBySectorDept($codSector,$codDept);
+        return $entidadesEducativas;
+    }
+
+    public function stadisticByActoAdmon(){
+        $entidadesEducativas = $this->service->stadisticByActoAdmon();
+        return $entidadesEducativas;
+    }
+    public function stadisticByNormaCreacion(){
+        $entidadesEducativas = $this->service->stadisticByNormaCreacion();
         return $entidadesEducativas;
     }
     public function actoAdmin(){
