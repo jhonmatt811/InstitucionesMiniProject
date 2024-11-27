@@ -1,8 +1,8 @@
 <?php
-require_once '../../controllers/EntidadesEducativas.php';
+require_once '../../controllers/Instituciones.php';
 
 // Crear una instancia del controlador
-$entidadesEducativas = new EntidadesEducativas();
+$entidadesEducativas = new Instituciones();
 $instituciones = $entidadesEducativas->getAll();
 ?>
 

@@ -3,10 +3,15 @@
     require_once './src/controllers/EntidadesEducativas.php';
     require_once './src/controllers/Departamentos.php';
     require_once './src/controllers/Sectores.php';
-
+    require_once './src/controllers/Academico.php';
+    require_once './src/controllers/Acto.php';
+    
+   
+           
+    
     $tipoEstadistica = $_POST['tipo_estadistica'] ?? null;
     $departamentoSeleccionado = $_POST['departamento'] ?? null;
-    $caracterSeleccionado = $_POST['academico'];
+    $caracterSeleccionado = $_POST['academico']?? null;
     $sectorSeleccionado = $_POST['sector'] ?? null;
     $actoSeleccionado = $_POST['acto'] ?? null;
 
@@ -15,41 +20,41 @@
     $estadistica = new Estadisticas(new Database);
     $departamentosCtrl = new Departamentos();
     $sectoresCtrl = new Sectores();
-
+    $academicoCtrl = new Academico();
+    $actoCtrl = new Acto();
 
     $departamentosNoRepeat = $departamentosCtrl->getAll();
     $sectoresNoRepeat = $sectoresCtrl->getAll();
+    $academicoNoRepeat = $academicoCtrl->getAll();
+    $actoNoRepeat = $actoCtrl->getAll();
 
     $instituciones = [];
     $institucionesPorCaracterAcademico = $estadistica->getStatisticsByAcademicCharacter();
     $institucionesPorSectorDepartamento = [];
-    $institucionesPorActoAdmon = $estadistica->getStatisticsByAdministrativeAct();
+    $institucionesPorActoAdmon = [];
     $institucionesPorNormaCreacion = $estadistica->getStatisticsByCreationNorm();
     $sectores = [];
 
     $tiposActo = $entidadesEducativas->actoAdmin();
 
     #por reporte
-
-
-    $institucionesReporte = [];
-    $institucionesActo = [];
+    $institucionesReporteAcadem = [];
     $institucionesCaracter = [];
     $institucionesSector = [];
 
     if($departamentoSeleccionado != null){
-        $instituciones = $estadistica->getInstitutionsByDepartmentAndStatus($departamentoSeleccionado);
-        $institucionesPorSectorDepartamento = $estadistica->getStatisticsBySectorAndDepartmentById($departamentoSeleccionado);
-        $institucionesReporte = $entidadesEducativas->getInstByDeptStatus($status,$departamentoSeleccionado);
-        $institucionesSector = $entidadesEducativas->instBySectorDept($sectorSeleccionado,$departamentoSeleccionado);
+        $instituciones = $estadistica->getInstitutionsByDepartmentById($departamentoSeleccionado);
+        $institucionesReporteAcadem = $estadistica->getInstByAcademic($caracterSeleccionado);
+        $institucionesPorSectorDepartamento = $estadistica->getStatisticsBySectorAndDepartmentById($departamentoSeleccionado,$sectorSeleccionado);
+        $institucionesPorActoAdmon = $estadistica->getStatisticsByAdministrativeActById($actoSeleccionado);
     }else{
-        $instituciones = $estadistica->getInstitutionsByDepartmentAndStatus();
-        $institucionesPorSectorDepartamento = $estadistica->stadisticBySectorDept();
+        $instituciones = $estadistica->getInstitutionsByDepartment();
+        $institucionesPorSectorDepartamento = $estadistica->getStatisticsBySectorAndDepartment();
         $institucionesCaracter = $entidadesEducativas->getByAcademicCHaracter($caracterSeleccionado);
         $institucionesSector = $entidadesEducativas->instBySector($sectorSeleccionado);
     }
     // Inicializar valores
-
+   /*
     // Formatear los datos para JavaScript
     $departamentos = [];
     $institucionesActivas = [];
@@ -98,7 +103,7 @@
     foreach ($institucionesPorNormaCreacion as $norma) {
         $normasCreacion[] = $norma['nomb_norma'];
         $totalInstitucionesPorNorma[] = $norma['total_inst'];
-    }
+    }*/
 ?>
 
 <?php include './src/components/Header.php'; ?>
@@ -122,7 +127,7 @@
                         <option value="2" <?= $tipoEstadistica == "2" ? 'selected' : '' ?>>Instituciones por Tipo de Carácter Académico</option>
                         <option value="3" <?= $tipoEstadistica == "3" ? 'selected' : '' ?>>Instituciones por Sector en Cada Departamento</option>
                         <option value="4" <?= $tipoEstadistica == "4" ? 'selected' : '' ?>>Instituciones por Acto Administrativo</option>
-                        <option value="5" <?= $tipoEstadistica == "5" ? 'selected' : '' ?>>Instituciones por Norma de Creación</option>
+                        <option value="5" <?= $tipoEstadistica == "5" ? 'selected' : '' ?>>Cantidad de Instituciones por Norma de Creación</option>
                     </select>
 
                     <!-- Selección de Departamento -->
@@ -140,42 +145,50 @@
                         </select>
                     </div>
 
-                    <!-- Selección de Sector -->
+                    <!-- Selección de academico -->
                     <div id="academico_container" style="display: none;">
-                        <label for="caracter_académico" class="block text-black font-medium mb-1">Carácter académico</label>
-                        <select id="caracter_académico" name="caracter_académico" class="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">Todos</option>
-                            <?php foreach ($sectoresNoRepeat as $sector): ?>
-                                <option 
-                                    value="<?php echo htmlspecialchars($sector["cod_sector"]); ?>" 
-                                    <?= $departamentoSeleccionado == $sector["cod_sector"] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($sector["nomb_sector"]); ?>
-                                </option>
-                            <?php endforeach; ?>
+                        <label for="academico" class="block text-black font-medium mb-1">Carácter académico</label>
+                            <select id="academico" name="academico" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">Todos</option>
+                                <?php foreach ($academicoNoRepeat as $academico): ?>
+                                    <option 
+                                        value="<?php echo htmlspecialchars($academico["cod_academ"]); ?>" 
+                                        <?= $caracterSeleccionado == $academico["cod_academ"] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($academico["nomb_academ"]); ?>
+                                    </option>
+                                <?php endforeach; ?>
                         </select>
                     </div>
 
                     <!-- Selección de Sector -->
                     <div id="sector_container" style="display: none;">
-                        <label for="sector" class="block text-black font-medium mb-1">Tipo Sector</label>
-                        <select id="sector" name="sector" class="w-full p-2 border border-gray-300 rounded-md">
-                            <option value="sect_01" <?= $sectorSeleccionado == 'sect_01' ? 'selected' : ''; ?>>Pública</option>
-                            <option value="sect_02" <?= $sectorSeleccionado == 'sect_02' ? 'selected' : ''; ?>>Privada</option>
-                        </select>
-                        </div>
+                        <label for="sector" class="block text-black font-medium mb-1">Sector</label>
+                            <select id="sector" name="sector" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">Todos</option>
+                                <?php foreach ($sectoresNoRepeat as $sector): ?>
+                                    <option 
+                                        value="<?php echo htmlspecialchars($sector["cod_sector"]); ?>" 
+                                        <?= $sectorSeleccionado == $sector["cod_sector"] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($sector["nomb_sector"]); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                    </div>
 
                     <!-- Selección de Acto Administrativo -->
                     <div id="acto_container" style="display: none;">
-                        <label for="acto" class="block text-black font-medium mb-1">Tipo Acto Administrativo</label>
-                        <select id="acto" name="acto" class="w-full p-2 border border-gray-300 rounded-md">
-                            <?php foreach ($tiposActo as $item): ?>
-                                <option 
-                                    value="<?php echo htmlspecialchars($item['cod_admon']); ?>" 
-                                    <?= $actoSeleccionado == $item['cod_admon'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($item['nomb_admon']); ?>
-                                </option>
-                            <?php endforeach; ?>
+                    <label for="acto" class="block text-black font-medium mb-1">Tipo Acto Administrativo</label>
+                            <select id="acto" name="acto" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="">Todos</option>
+                                <?php foreach ($actoNoRepeat as $acto): ?>
+                                    <option 
+                                        value="<?php echo htmlspecialchars($acto["cod_admon"]); ?>" 
+                                        <?= $actoSeleccionado == $acto["cod_admon"] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($acto["nomb_admon"]); ?>
+                                    </option>
+                                <?php endforeach; ?>
                         </select>
+                    
                     </div>
 
                 </div>
@@ -189,60 +202,149 @@
 
 
         <?php if ($tipoEstadistica == "1"): ?>
-            <h2 class="text-2xl font-bold px-4 mb-2">Instituciones Activas e Inactivas por Departamento</h2>
-            <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                <div>
-                    <canvas id="institucionesPorDepartamento" width="800" height="300"></canvas>
+            <div class="bg-white shadow-md rounded-lg px-4 pb-4">
+                <div class="flex items-center justify-between px-4 pt-20 mb-2">
+                    <h1 class="text-3xl font-bold">Tabla Instituciones</h1>
                 </div>
-                <table class="table-auto w-full border-collapse border border-gray-200 bg-white shadow-md">
+                <table class="w-full bg-white border border-gray-200">
                     <thead>
-                        <tr class="bg-gray-200">
-                            <th class="border border-gray-300 px-4 py-2 text-left">Nombre Institución</th>
-                            <th class="border border-gray-300 px-4 py-2 text-left">Municipio</th>
-                            <th class="border border-gray-300 px-4 py-2 text-left">Departamento</th>
-                            <th class="border border-gray-300 px-4 py-2 text-left">Dirección</th>
+                        <tr>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Nombre Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">ID Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Sector</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Carácter Académico</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Municipio</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Departamento</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Estado</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Programas Vigentes</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Acreditada</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php foreach ($institucionesReporte as $fila): ?>
+                    <tbody>                    
+                        <?php foreach ($instituciones as $fila): ?>
                             <tr class="hover:bg-gray-100">
-                                <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['nomb_inst']) ?></td>
-                                <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['nomb_munic']) ?></td>
-                                <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['nomb_depto']) ?></td>
-                                <td class="border border-gray-300 px-4 py-2"><?= htmlspecialchars($fila['direccion']) ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['cod_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_sector']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_academ']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_munic']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_depto']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_estado']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['programas_vigente']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['acreditada']); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                
             </div>
         <?php elseif ($tipoEstadistica == "2"): ?>
-            <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Tipo de Carácter Académico</h2>
-            <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                <div class="max-w-md mx-auto">
-                    <canvas id="institucionesPorCaracterAcademico" class="w-full h-auto"></canvas>
+            <div class="bg-white shadow-md rounded-lg px-4 pb-4">
+                <div class="flex items-center justify-between px-4 pt-20 mb-2">
+                    <h1 class="text-3xl font-bold">Tabla Instituciones</h1>
                 </div>
+                <table class="w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Nombre Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">ID Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Sector</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Carácter Académico</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Municipio</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Departamento</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Estado</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Programas Vigentes</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Acreditada</th>
+                        </tr>
+                    </thead>
+                    <tbody>                    
+                        <?php foreach ($institucionesReporteAcadem as $fila): ?>
+                            <tr class="hover:bg-gray-100">
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['cod_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_sector']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_academ']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_munic']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_depto']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_estado']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['programas_vigente']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['acreditada']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         <?php elseif ($tipoEstadistica == "3"): ?>
-            <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Sector en Cada Departamento</h2>
-            <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                <div class="">
-                    <canvas id="institucionesPorSector" width="800" height="300"></canvas>
+            <div class="bg-white shadow-md rounded-lg px-4 pb-4">
+                <div class="flex items-center justify-between px-4 pt-20 mb-2">
+                    <h1 class="text-3xl font-bold">Tabla Instituciones</h1>
                 </div>
+                <table class="w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Nombre Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">ID Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Sector</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Carácter Académico</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Municipio</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Departamento</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Estado</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Programas Vigentes</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Acreditada</th>
+                        </tr>
+                    </thead>
+                    <tbody>                    
+                        <?php foreach ($institucionesPorSectorDepartamento as $fila): ?>
+                            <tr class="hover:bg-gray-100">
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['cod_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_sector']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_academ']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_munic']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_depto']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_estado']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['programas_vigente']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['acreditada']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
+            </section>
         <?php elseif ($tipoEstadistica == "4"): ?>
-            <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Acto Administrativo</h2>
-            <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                <div class="max-w-md mx-auto">
-                    <canvas id="institucionesPorActoAdmon" class="w-full h-auto"></canvas>
+            <div class="bg-white shadow-md rounded-lg px-4 pb-4">
+                <div class="flex items-center justify-between px-4 pt-20 mb-2">
+                    <h1 class="text-3xl font-bold">Tabla Instituciones</h1>
                 </div>
-            </div>
-        <?php elseif ($tipoEstadistica == "5"): ?>
-            <h2 class="text-2xl font-bold px-4 mb-2">Instituciones por Norma de Creación</h2>
-            <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                <div class="max-w-md mx-auto">
-                    <canvas id="institucionesPorNormaCreacion" class="w-full h-auto"></canvas>
-                </div>
+                <table class="w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Nombre Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">ID Institución</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Sector</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Acto Administrativo</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Municipio</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Departamento</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Estado</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Programas Vigentes</th>
+                            <th class="py-2 px-4 border-b text-left bg-gray-200">Acreditada</th>
+                        </tr>
+                    </thead>
+                    <tbody>                    
+                        <?php foreach ($institucionesPorActoAdmon as $fila): ?>
+                            <tr class="hover:bg-gray-100">
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['cod_inst']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_sector']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_admon']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_munic']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_depto']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['nomb_estado']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['programas_vigente']); ?></td>
+                                <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($fila['acreditada']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         <?php endif; ?>
 
@@ -269,15 +371,16 @@
         
         function toggleEleccion() {
             const seleccion = document.getElementById('tipo_estadistica').value;
-            console.log('Valor seleccionado:', seleccion);
             const departamentoContainer = document.getElementById('departamento_container');
+            const academicoContainer = document.getElementById('academico_container');
             const sectorContainer = document.getElementById('sector_container');
             const actoContainer = document.getElementById('acto_container');
             
             departamentoContainer.style.display = 'none';
-                sectorContainer.style.display = 'none';
-                actoContainer.style.display = 'none';
-
+            sectorContainer.style.display = 'none';
+            actoContainer.style.display = 'none';
+            academicoContainer.style.display = 'none'; 
+            
             // Mostrar el contenedor correspondiente según la selección
             if (seleccion ==='3') {
                 sectorContainer.style.display = 'block';
@@ -286,6 +389,8 @@
                 departamentoContainer.style.display = 'block';
             } else if (seleccion === '4') {
                 actoContainer.style.display = 'block';
+            } else if (seleccion === '2') {
+                academicoContainer.style.display = 'block';
             }
             
         }
@@ -294,7 +399,7 @@
         });
         
             if(tipoEstadistica == '1'){            
-            // Configuración del gráfico de instituciones por departamento
+
                 const ctxDepartamentos = document.getElementById('institucionesPorDepartamento').getContext('2d');
                 const chartDepartamentos = new Chart(ctxDepartamentos, {
                     type: 'bar',
@@ -523,6 +628,7 @@
                     }
                 });
             }
+        
         </script>
 </body>
 </html>

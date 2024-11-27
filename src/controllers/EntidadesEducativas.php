@@ -63,9 +63,6 @@ class EntidadesEducativas {
         exit;
     }
 
-    public function getInstByStatus($codEstado){
-        return $this->service->getInstByStatus($codEstado);
-    }
     public function getInstByDeptStatus($codEstado,$codDept){
         return $this->service->getInstByDeptStatus($codEstado,$codDept);
     }

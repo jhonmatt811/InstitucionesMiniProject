@@ -8,7 +8,15 @@
         }
 
         public function getAll(){
-            $query = 'SELECT * FROM instituciones;';
+            $query = 'SELECT i.nomb_inst,i.cod_inst ,sec.nomb_sector, car.nomb_academ, mun.nomb_munic,dep.nomb_depto, es.nomb_estado, inst.programas_vigente, inst.acreditada FROM instituciones i 
+                        JOIN sectores sec ON i.cod_sector=sec.cod_sector
+                        JOIN caracter_academico car ON i.cod_academ=car.cod_academ
+                        JOIN inst_por_municipio inst ON i.cod_inst=inst.cod_inst
+                        JOIN municipios mun ON inst.cod_munic=mun.cod_munic
+                        JOIN estados es ON inst.cod_estado=es.cod_estado
+                        JOIN departamentos dep ON mun.cod_depto=dep.cod_depto
+                        ORDER BY i.nomb_inst ASC;
+                        ';
             $stmt = $this->db->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll();
@@ -56,22 +64,7 @@
             return $stmt->fetchAll();
         }
         
-        public function getInstByStatus($codDept){
-            echo $codDept;
-            $query = "
-                SELECT instP.nomb_inst,mun.nomb_munic,dept.nomb_depto,inst.direccion
-                FROM instituciones instP
-                JOIN cobertura c ON c.cod_inst = instP.cod_inst
-                JOIN municipios mun ON mun.cod_munic = c.cod_munic
-                JOIN departamentos depto ON depto.cod_depto = mun.cod_depto
-                JOIN inst_por_municipio inst  ON inst.cod_inst = instP.cod_inst
-                 WHERE cod_estado = :cod_estado;
-            ";
-            $stms = $this->db->prepare($query);
-            $stms->bindParam('cod_estado',$codEstado);
-            $stms->execute();
-            return $stms->fetchAll();
-        }
+        
         public function getInstByDeptStatus($codEstado,$codDept){
             $query = "
                 SELECT instP.nomb_inst,mun.nomb_munic,depto.nomb_depto,inst.direccion

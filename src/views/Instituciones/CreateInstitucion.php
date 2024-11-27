@@ -1,10 +1,10 @@
 <?php
-    require_once '../../controllers/CaracterAcademico.php';
+    require_once '../../controllers/Academico.php';
     require_once '../../controllers/Sectores.php';
     require_once '../../components/Header.php';
 
     session_start();
-    $caracterAcademico = new CaracterAcademico();
+    $caracterAcademico = new Academico();
     $caracteresAcademicos = $caracterAcademico->getAll();
 
     $sectores = new Sectores();
