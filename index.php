@@ -273,6 +273,7 @@
                     </tbody>
                 </table>
             </div>
+            </section>
         <?php elseif ($tipoEstadistica == "3"): ?>
             <div class="bg-white shadow-md rounded-lg px-4 pb-4">
                 <div class="flex items-center justify-between px-4 pt-20 mb-2">
