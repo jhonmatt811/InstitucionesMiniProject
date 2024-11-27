@@ -36,7 +36,6 @@
     $sectores = [];
 
     $tiposActo = $entidadesEducativas->actoAdmin();
-    echo "<p> holla $caracterSeleccionado </p>";
     #por reporte
     $institucionesReporteAcadem = [];
     $institucionesCaracter = [];

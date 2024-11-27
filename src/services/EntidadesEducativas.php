@@ -84,13 +84,13 @@
         
         public function getByAcademicCHaracterById($caracterAcademico){
             $query = "
-                SELECT instP.nomb_inst,mun.nomb_munic,dept.nomb_depto,inst.direccion,cad.nomb_academ
+                SELECT instP.nomb_inst,mun.nomb_munic,dept.nomb_depto,i.direccion,cad.nomb_academ
                 FROM instituciones instP
-                JOIN cobertura c ON c.cod_inst = instP.cod_inst
-                JOIN municipios mun ON mun.cod_munic = c.cod_munic
+                JOIN inst_por_municipio i ON instP.cod_inst=i.cod_inst
+                JOIN municipios mun ON mun.cod_munic = i.cod_munic
                 JOIN departamentos dept ON dept.cod_depto = mun.cod_depto
-                JOIN inst_por_municipio inst  ON inst.cod_inst = instP.cod_inst
-                JOIN caracter_academico cad ON cad.cod_academ = instP.cod_academ
+                JOIN caracter_academico cad ON cad.cod_academ = instP.cod_academ;
+
                  WHERE cad.cod_academ = :caracter_academico;
             ";
             $stms = $this->db->prepare($query);
