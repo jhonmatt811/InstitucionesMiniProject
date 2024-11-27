@@ -86,10 +86,7 @@
         $totalInstitucionesPorNorma[] = $norma['total_inst'];
     }
     
-    foreach ($institucionesPorNormaCreacion as $norma) {
-        $normasCreacion[] = $norma['nomb_norma'];
-        $totalInstitucionesPorNorma[] = $norma['total_inst'];
-    }
+    
     ?>
 
     <?php include './src/components/Header.php'; ?>
